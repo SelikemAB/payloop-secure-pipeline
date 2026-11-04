@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # PayLoop runtime image. Hardening choices are explained in docs/pipeline-design.md.
 # In production pin the base image by digest (php:8.3-fpm-alpine3.20@sha256:...) and let Dependabot propose updates.
-FROM php:8.3-fpm-alpine3.20
+FROM php:8.4-fpm-alpine3.20
 
 RUN adduser -D -u 10001 -s /sbin/nologin app \
  && mkdir -p /srv/payloop/var \
