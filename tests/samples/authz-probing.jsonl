@@ -1,0 +1,3 @@
+{"ts": "2026-10-30T10:00:00Z", "app": "payloop", "event": "authz_denied", "srcip": "203.0.113.50", "rid": "r00000", "user": "bob", "resource": "wallet", "wallet_id": 1}
+{"ts": "2026-10-30T10:00:05Z", "app": "payloop", "event": "authz_denied", "srcip": "203.0.113.50", "rid": "r00005", "user": "bob", "resource": "wallet", "wallet_id": 2}
+{"ts": "2026-10-30T10:00:10Z", "app": "payloop", "event": "authz_denied", "srcip": "203.0.113.50", "rid": "r00010", "user": "bob", "resource": "wallet", "wallet_id": 3}

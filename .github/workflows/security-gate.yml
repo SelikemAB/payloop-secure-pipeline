@@ -1,0 +1,135 @@
+name: security-gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Least privilege by default. Jobs that need more must ask explicitly.
+permissions:
+  contents: read
+
+concurrency:
+  group: gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0, persist-credentials: false}
+      - name: gitleaks (working tree + history)
+        run: |
+          mkdir -p reports
+          docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.21.2 \
+            detect --source /repo --config /repo/.gitleaks.toml --report-format json \
+            --report-path /repo/reports/gitleaks.json --redact --exit-code 0 --no-banner
+      - uses: actions/upload-artifact@v4
+        with: {name: report-gitleaks, path: reports/gitleaks.json, if-no-files-found: error}
+
+  sast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install semgrep==1.183.0
+      - name: semgrep (custom taint rules, offline)
+        run: |
+          mkdir -p reports
+          semgrep --config semgrep/ --metrics=off --disable-version-check --quiet --json --output reports/semgrep.json app/src app/public
+      - uses: actions/upload-artifact@v4
+        with: {name: report-semgrep, path: reports/semgrep.json, if-no-files-found: error}
+
+  container-and-iac:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Build image
+        run: docker build -t payloop:ci .
+      - name: Trivy filesystem (vulnerabilities, secrets, misconfiguration)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          skip-dirs: samples,tests
+          format: json
+          output: reports/trivy-fs.json
+          exit-code: "0"
+      - name: Trivy image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: payloop:ci
+          format: json
+          output: reports/trivy-image.json
+          exit-code: "0"
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - name: checkov (Dockerfile and workflows)
+        run: |
+          pip install checkov==3.4.0
+          mkdir -p reports/checkov-out
+          checkov -d . --framework dockerfile,github_actions --skip-path samples --skip-path tests -o json --output-file-path reports/checkov-out || true
+          mv reports/checkov-out/results_json.json reports/checkov.json
+      - uses: actions/upload-artifact@v4
+        with: {name: report-container-iac, path: "reports/*.json", if-no-files-found: error}
+
+  sbom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: anchore/sbom-action@v0
+        with:
+          path: app
+          format: spdx-json
+          output-file: sbom.spdx.json
+          upload-artifact: true
+          upload-artifact-retention: 90
+
+  exploit-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: shivammathur/setup-php@v2
+        with: {php-version: "8.3", extensions: "pdo_sqlite, sodium"}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - name: Known exploits must stay dead (SQLi, IDOR, traversal, SSRF, forged token, throttling, transfer logic, error leak)
+        run: python3 tests/lab.py --app app --expect mitigated
+      - name: SSRF guard bypass cases
+        run: php tests/ssrf_guard_test.php app
+
+  gate:
+    # The ONLY job to mark as a required status check. It runs even if scanners failed, and fails closed on missing reports.
+    needs: [secrets, sast, container-and-iac, sbom, exploit-regression]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pyyaml
+      - uses: actions/download-artifact@v4
+        with: {path: reports, pattern: "report-*", merge-multiple: true}
+      - name: Upstream jobs must have succeeded
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: python3 tools/needs_check.py
+      - name: Apply policy
+        run: python3 tools/gate.py --policy policy/gate-policy.yml --reports reports --json gate-result.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: gate-result, path: gate-result.json, if-no-files-found: ignore}

@@ -1,0 +1,28 @@
+# One policy for every scanner. Change blocking behaviour here, not in the workflow.
+version: 1
+
+# Fail closed: these reports MUST exist (named <key>.json in the reports dir) or the build fails with exit 2.
+required_reports: [semgrep, gitleaks, trivy-fs, trivy-image, checkov]
+
+block_on: [critical, high]
+warn_on: [medium]
+
+# Scanners without native severity (checkov free tier report none) default to medium; pin the ones that matter here.
+severity_overrides:
+  payloop.php.taint-to-sql: critical
+  payloop.php.hardcoded-secret: critical
+  CKV_DOCKER_1: high      # SSH port exposed
+  CKV_DOCKER_3: high      # container would run as root
+  CKV_DOCKER_7: medium    # unpinned base image tag
+  CKV_DOCKER_4: medium    # ADD instead of COPY
+  CKV_DOCKER_2: low       # no HEALTHCHECK
+
+# Waivers: temporary, owned, justified. An expired waiver fails the build.
+max_exception_days: 90
+exceptions: []
+# - id: CVE-2026-12345
+#   tool: trivy                  # optional: restrict to one scanner family
+#   paths: ["composer.lock"]     # optional: restrict to matching files
+#   reason: "Vulnerable function not reachable; upstream fix due next release"
+#   owner: security-team
+#   expires: 2026-12-15

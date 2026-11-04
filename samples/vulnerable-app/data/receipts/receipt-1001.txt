@@ -1,0 +1,5 @@
+PAYLOOP RECEIPT 1001
+from: wallet 1
+to: wallet 2
+amount: GHS 50.00
+status: completed

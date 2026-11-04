@@ -1,0 +1,10 @@
+{"ts": "2026-10-30T10:00:00Z", "app": "payloop", "event": "login_failed", "srcip": "203.0.113.50", "rid": "r00000", "username": "dave", "reason": "bad_password"}
+{"ts": "2026-10-30T10:00:03Z", "app": "payloop", "event": "login_failed", "srcip": "203.0.113.50", "rid": "r00003", "username": "dave", "reason": "bad_password"}
+{"ts": "2026-10-30T10:00:06Z", "app": "payloop", "event": "login_failed", "srcip": "203.0.113.50", "rid": "r00006", "username": "dave", "reason": "bad_password"}
+{"ts": "2026-10-30T10:00:09Z", "app": "payloop", "event": "login_failed", "srcip": "203.0.113.50", "rid": "r00009", "username": "dave", "reason": "bad_password"}
+{"ts": "2026-10-30T10:00:12Z", "app": "payloop", "event": "login_failed", "srcip": "203.0.113.50", "rid": "r00012", "username": "dave", "reason": "bad_password"}
+{"ts": "2026-10-30T10:00:15Z", "app": "payloop", "event": "login_failed", "srcip": "203.0.113.50", "rid": "r00015", "username": "dave", "reason": "bad_password"}
+{"ts": "2026-10-30T10:00:18Z", "app": "payloop", "event": "login_failed", "srcip": "203.0.113.50", "rid": "r00018", "username": "dave", "reason": "bad_password"}
+{"ts": "2026-10-30T10:00:21Z", "app": "payloop", "event": "login_failed", "srcip": "203.0.113.50", "rid": "r00021", "username": "dave", "reason": "bad_password"}
+{"ts": "2026-10-30T10:00:24Z", "app": "payloop", "event": "login_failed", "srcip": "203.0.113.50", "rid": "r00024", "username": "dave", "reason": "bad_password"}
+{"ts": "2026-10-30T10:00:27Z", "app": "payloop", "event": "login_failed", "srcip": "203.0.113.50", "rid": "r00027", "username": "dave", "reason": "bad_password"}

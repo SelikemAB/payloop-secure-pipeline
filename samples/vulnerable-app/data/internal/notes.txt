@@ -1,0 +1,1 @@
+INTERNAL ONLY (fictional): ops notes, db host db.internal.example, rotation due.

@@ -1,0 +1,1 @@
+{"ts": "2026-10-30T10:00:01Z", "app": "payloop", "event": "ssrf_blocked", "srcip": "203.0.113.50", "rid": "r00001", "user": "alice", "target_host": "10.0.0.5", "reason": "host_not_allowlisted"}

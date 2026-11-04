@@ -1,0 +1,5 @@
+# Changes to the gate itself need the security owner's review, otherwise the gate can be weakened by the PR it is judging.
+/policy/              @SelikemAB
+/tools/gate.py        @SelikemAB
+/.github/workflows/   @SelikemAB
+/detections/          @SelikemAB

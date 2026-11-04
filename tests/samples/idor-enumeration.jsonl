@@ -1,0 +1,6 @@
+{"ts": "2026-10-30T10:00:00Z", "app": "payloop", "event": "wallet_view", "srcip": "203.0.113.50", "rid": "r00000", "user": "alice", "wallet_id": 2}
+{"ts": "2026-10-30T10:00:02Z", "app": "payloop", "event": "wallet_view", "srcip": "203.0.113.50", "rid": "r00002", "user": "alice", "wallet_id": 3}
+{"ts": "2026-10-30T10:00:04Z", "app": "payloop", "event": "wallet_view", "srcip": "203.0.113.50", "rid": "r00004", "user": "alice", "wallet_id": 4}
+{"ts": "2026-10-30T10:00:06Z", "app": "payloop", "event": "wallet_view", "srcip": "203.0.113.50", "rid": "r00006", "user": "alice", "wallet_id": 5}
+{"ts": "2026-10-30T10:00:08Z", "app": "payloop", "event": "wallet_view", "srcip": "203.0.113.50", "rid": "r00008", "user": "alice", "wallet_id": 6}
+{"ts": "2026-10-30T10:00:10Z", "app": "payloop", "event": "wallet_view", "srcip": "203.0.113.50", "rid": "r00010", "user": "alice", "wallet_id": 7}

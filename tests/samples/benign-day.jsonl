@@ -1,0 +1,9 @@
+{"ts": "2026-10-30T10:00:00Z", "app": "payloop", "event": "login_success", "srcip": "198.51.100.30", "rid": "r00000", "user": "alice", "username": "alice"}
+{"ts": "2026-10-30T10:00:01Z", "app": "payloop", "event": "request", "srcip": "203.0.113.50", "rid": "r00001", "user": "alice", "method": "GET", "path": "/wallet", "query": "id=1", "status": 200}
+{"ts": "2026-10-30T10:00:01Z", "app": "payloop", "event": "wallet_view", "srcip": "203.0.113.50", "rid": "r00001", "user": "alice", "wallet_id": 1}
+{"ts": "2026-10-30T10:00:05Z", "app": "payloop", "event": "request", "srcip": "203.0.113.50", "rid": "r00005", "user": "alice", "method": "GET", "path": "/statement", "query": "wallet=1&q=rent", "status": 200}
+{"ts": "2026-10-30T10:00:09Z", "app": "payloop", "event": "transfer", "srcip": "203.0.113.50", "rid": "r00009", "user": "alice", "from_wallet": 1, "to_wallet": 2, "amount": 2500, "idem_key": "rent-oct-0001"}
+{"ts": "2026-10-30T10:00:30Z", "app": "payloop", "event": "login_failed", "srcip": "198.51.100.31", "rid": "r00030", "username": "bob", "reason": "bad_password"}
+{"ts": "2026-10-30T10:00:41Z", "app": "payloop", "event": "login_success", "srcip": "198.51.100.31", "rid": "r00041", "user": "bob", "username": "bob"}
+{"ts": "2026-10-30T10:00:50Z", "app": "payloop", "event": "request", "srcip": "203.0.113.50", "rid": "r00050", "user": "bob", "method": "GET", "path": "/receipt", "query": "file=receipt-1001.txt", "status": 200}
+{"ts": "2026-10-30T10:01:00Z", "app": "payloop", "event": "request", "srcip": "203.0.113.50", "rid": "r00060", "method": "GET", "path": "/health", "query": "", "status": 200}

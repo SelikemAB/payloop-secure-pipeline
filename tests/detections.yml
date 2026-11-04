@@ -1,0 +1,32 @@
+# Detection regression suite. Run: python3 tools/ruletest.py suite tests/detections.yml
+# expect        = rule ids that must appear as the FINAL rule of at least one alert
+# expect_absent = rule ids that must never fire (false-positive controls)
+# min_level / max_level bound the highest alert level seen.
+rules: ../detections/payloop_rules.xml
+cases:
+  - {name: "T1110 brute force, one IP, 10 failures/30s", events: samples/brute-force.jsonl, expect: [110101, 110111], min_level: 10}
+  - {name: "T1110 password spraying, 10 usernames, one IP", events: samples/spray-distinct-users.jsonl, expect: [110111]}
+  - {name: "T1110 success after repeated failures", events: samples/success-after-failures.jsonl, expect: [110112], min_level: 12}
+  - {name: "T1110 sustained attempts despite throttling", events: samples/throttled.jsonl, expect: [110103, 110113]}
+  - {name: "T1190 SQL injection in query string", events: samples/sqli-request.jsonl, expect: [110120], min_level: 10}
+  - {name: "T1190 path traversal in query string", events: samples/traversal-request.jsonl, expect: [110121], min_level: 10}
+  - {name: "T1190 SSRF succeeded against loopback", events: samples/ssrf-internal.jsonl, expect: [110131], expect_absent: [110132], min_level: 12}
+  - {name: "T1552.005 SSRF to cloud metadata endpoint", events: samples/ssrf-metadata.jsonl, expect: [110132], min_level: 14}
+  - {name: "T1190 SSRF blocked by guard", events: samples/ssrf-blocked.jsonl, expect: [110130]}
+  - {name: "IDOR enumeration: 6 different wallets in 12s", events: samples/idor-enumeration.jsonl, expect: [110140]}
+  - {name: "control: same wallet viewed 8 times is not enumeration", events: samples/same-wallet-repeat.jsonl, expect_absent: [110140], max_level: 3}
+  - {name: "access-control probing: 3 authz denials", events: samples/authz-probing.jsonl, expect: [110141]}
+  - {name: "T1657 negative amount accepted", events: samples/transfer-negative.jsonl, expect: [110150], min_level: 12}
+  - {name: "T1657 negative amount rejected (attempt)", events: samples/transfer-negative-rejected.jsonl, expect: [110153]}
+  - {name: "T1657 duplicate idempotency key accepted twice", events: samples/transfer-duplicate-key.jsonl, expect: [110151]}
+  - {name: "control: distinct idempotency keys are normal", events: samples/transfer-distinct-keys.jsonl, expect_absent: [110151], max_level: 3}
+  - {name: "T1606 repeated invalid tokens", events: samples/forged-tokens.jsonl, expect: [110160, 110161]}
+  - {name: "repeated 5xx from one source", events: samples/server-errors.jsonl, expect: [110123, 110124]}
+  - {name: "control: ordinary customer day raises no alert above level 5", events: samples/benign-day.jsonl, max_level: 5}
+  - name: "captured lab log, VULNERABLE app, exploit suite traffic"
+    events: samples/lab-baseline.jsonl
+    expect: [110111, 110120, 110121, 110131, 110150, 110151, 110170]
+  - name: "captured lab log, FIXED app, same exploit traffic"
+    events: samples/lab-fixed.jsonl
+    expect: [110103, 110113, 110120, 110122, 110130, 110152, 110153, 110160]
+    expect_absent: [110131, 110150, 110151, 110170]

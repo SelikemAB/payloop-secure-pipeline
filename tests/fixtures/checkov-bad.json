@@ -1,0 +1,292 @@
+{
+    "check_type": "dockerfile",
+    "results": {
+        "failed_checks": [
+            {
+                "check_id": "CKV_DOCKER_1",
+                "bc_check_id": null,
+                "check_name": "Ensure port 22 is not exposed",
+                "check_result": {
+                    "result": "FAILED",
+                    "results_configuration": [
+                        {
+                            "instruction": "EXPOSE",
+                            "startline": 5,
+                            "endline": 5,
+                            "content": "EXPOSE 22 80\n",
+                            "value": "22 80"
+                        }
+                    ]
+                },
+                "code_block": [
+                    [
+                        6,
+                        "EXPOSE 22 80\n"
+                    ]
+                ],
+                "file_path": "samples/bad-container/Dockerfile",
+                "file_abs_path": "/home/claude/portfolio/payloop-secure-pipeline/samples/bad-container/Dockerfile",
+                "repo_file_path": "/samples/bad-container/Dockerfile",
+                "file_line_range": [
+                    6,
+                    6
+                ],
+                "resource": "samples/bad-container/Dockerfile.EXPOSE",
+                "evaluations": null,
+                "check_class": "checkov.dockerfile.checks.ExposePort22",
+                "fixed_definition": null,
+                "entity_tags": null,
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": null,
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": null
+            },
+            {
+                "check_id": "CKV_DOCKER_7",
+                "bc_check_id": null,
+                "check_name": "Ensure the base image uses a non latest version tag",
+                "check_result": {
+                    "result": "FAILED",
+                    "results_configuration": [
+                        {
+                            "instruction": "FROM",
+                            "startline": 1,
+                            "endline": 1,
+                            "content": "FROM php:latest\n",
+                            "value": "php:latest"
+                        }
+                    ]
+                },
+                "code_block": [
+                    [
+                        2,
+                        "FROM php:latest\n"
+                    ]
+                ],
+                "file_path": "samples/bad-container/Dockerfile",
+                "file_abs_path": "/home/claude/portfolio/payloop-secure-pipeline/samples/bad-container/Dockerfile",
+                "repo_file_path": "/samples/bad-container/Dockerfile",
+                "file_line_range": [
+                    2,
+                    2
+                ],
+                "resource": "samples/bad-container/Dockerfile.FROM",
+                "evaluations": null,
+                "check_class": "checkov.dockerfile.checks.ReferenceLatestTag",
+                "fixed_definition": null,
+                "entity_tags": null,
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": null,
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": null
+            },
+            {
+                "check_id": "CKV_DOCKER_4",
+                "bc_check_id": null,
+                "check_name": "Ensure that COPY is used instead of ADD in Dockerfiles",
+                "check_result": {
+                    "result": "FAILED",
+                    "results_configuration": [
+                        {
+                            "instruction": "ADD",
+                            "startline": 2,
+                            "endline": 2,
+                            "content": "ADD https://example.com/install.sh /install.sh\n",
+                            "value": "https://example.com/install.sh /install.sh"
+                        }
+                    ]
+                },
+                "code_block": [
+                    [
+                        3,
+                        "ADD https://example.com/install.sh /install.sh\n"
+                    ]
+                ],
+                "file_path": "samples/bad-container/Dockerfile",
+                "file_abs_path": "/home/claude/portfolio/payloop-secure-pipeline/samples/bad-container/Dockerfile",
+                "repo_file_path": "/samples/bad-container/Dockerfile",
+                "file_line_range": [
+                    3,
+                    3
+                ],
+                "resource": "samples/bad-container/Dockerfile.ADD",
+                "evaluations": null,
+                "check_class": "checkov.dockerfile.checks.AddExists",
+                "fixed_definition": null,
+                "entity_tags": null,
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": null,
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": null
+            },
+            {
+                "check_id": "CKV_DOCKER_2",
+                "bc_check_id": null,
+                "check_name": "Ensure that HEALTHCHECK instructions have been added to container images",
+                "check_result": {
+                    "result": "FAILED",
+                    "results_configuration": null
+                },
+                "code_block": [
+                    [
+                        1,
+                        "# Intentionally insecure: used only to prove the pipeline gate fails. Do not copy.\n"
+                    ],
+                    [
+                        2,
+                        "FROM php:latest\n"
+                    ],
+                    [
+                        3,
+                        "ADD https://example.com/install.sh /install.sh\n"
+                    ],
+                    [
+                        4,
+                        "RUN chmod +x /install.sh && /install.sh\n"
+                    ],
+                    [
+                        5,
+                        "COPY . /var/www/html\n"
+                    ],
+                    [
+                        6,
+                        "EXPOSE 22 80\n"
+                    ],
+                    [
+                        7,
+                        "CMD [\"php\", \"-S\", \"0.0.0.0:80\", \"-t\", \"/var/www/html\"]"
+                    ]
+                ],
+                "file_path": "samples/bad-container/Dockerfile",
+                "file_abs_path": "/home/claude/portfolio/payloop-secure-pipeline/samples/bad-container/Dockerfile",
+                "repo_file_path": "/samples/bad-container/Dockerfile",
+                "file_line_range": [
+                    1,
+                    7
+                ],
+                "resource": "samples/bad-container/Dockerfile.",
+                "evaluations": null,
+                "check_class": "checkov.dockerfile.checks.HealthcheckExists",
+                "fixed_definition": null,
+                "entity_tags": null,
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": null,
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": null
+            },
+            {
+                "check_id": "CKV_DOCKER_3",
+                "bc_check_id": null,
+                "check_name": "Ensure that a user for the container has been created",
+                "check_result": {
+                    "result": "FAILED",
+                    "results_configuration": null
+                },
+                "code_block": [
+                    [
+                        1,
+                        "# Intentionally insecure: used only to prove the pipeline gate fails. Do not copy.\n"
+                    ],
+                    [
+                        2,
+                        "FROM php:latest\n"
+                    ],
+                    [
+                        3,
+                        "ADD https://example.com/install.sh /install.sh\n"
+                    ],
+                    [
+                        4,
+                        "RUN chmod +x /install.sh && /install.sh\n"
+                    ],
+                    [
+                        5,
+                        "COPY . /var/www/html\n"
+                    ],
+                    [
+                        6,
+                        "EXPOSE 22 80\n"
+                    ],
+                    [
+                        7,
+                        "CMD [\"php\", \"-S\", \"0.0.0.0:80\", \"-t\", \"/var/www/html\"]"
+                    ]
+                ],
+                "file_path": "samples/bad-container/Dockerfile",
+                "file_abs_path": "/home/claude/portfolio/payloop-secure-pipeline/samples/bad-container/Dockerfile",
+                "repo_file_path": "/samples/bad-container/Dockerfile",
+                "file_line_range": [
+                    1,
+                    7
+                ],
+                "resource": "samples/bad-container/Dockerfile.",
+                "evaluations": null,
+                "check_class": "checkov.dockerfile.checks.UserExists",
+                "fixed_definition": null,
+                "entity_tags": null,
+                "caller_file_path": null,
+                "caller_file_line_range": null,
+                "resource_address": null,
+                "severity": null,
+                "bc_category": null,
+                "benchmarks": null,
+                "description": null,
+                "short_description": null,
+                "vulnerability_details": null,
+                "connected_node": null,
+                "guideline": null,
+                "details": [],
+                "check_len": null,
+                "definition_context_file_path": null
+            }
+        ]
+    },
+    "summary": {
+        "passed": 20,
+        "failed": 5,
+        "skipped": 0,
+        "parsing_errors": 0,
+        "resource_count": 1,
+        "checkov_version": "3.4.0"
+    }
+}

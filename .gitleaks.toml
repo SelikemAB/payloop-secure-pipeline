@@ -1,0 +1,8 @@
+title = "payloop gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "intentionally vulnerable teaching samples and scanner fixtures; real code is never allow-listed"
+paths = ['''^samples/''', '''^tests/fixtures/''']

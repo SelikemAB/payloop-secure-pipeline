@@ -1,0 +1,4 @@
+{"ts": "2026-10-30T10:00:00Z", "app": "payloop", "event": "login_rate_limited", "srcip": "203.0.113.50", "rid": "r00000", "username": "dave"}
+{"ts": "2026-10-30T10:00:10Z", "app": "payloop", "event": "login_rate_limited", "srcip": "203.0.113.50", "rid": "r00010", "username": "dave"}
+{"ts": "2026-10-30T10:00:20Z", "app": "payloop", "event": "login_rate_limited", "srcip": "203.0.113.50", "rid": "r00020", "username": "dave"}
+{"ts": "2026-10-30T10:00:30Z", "app": "payloop", "event": "login_rate_limited", "srcip": "203.0.113.50", "rid": "r00030", "username": "dave"}

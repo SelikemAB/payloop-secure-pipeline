@@ -1,0 +1,1 @@
+{"ts": "2026-10-30T10:00:01Z", "app": "payloop", "event": "webhook_fetch", "srcip": "203.0.113.50", "rid": "r00001", "user": "alice", "target_host": "127.0.0.1"}

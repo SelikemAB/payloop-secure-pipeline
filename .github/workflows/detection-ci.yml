@@ -1,0 +1,26 @@
+name: detection-ci
+
+on:
+  pull_request:
+    paths: ["detections/**", "tests/detections.yml", "tests/samples/**", "tools/ruletest.py"]
+  push:
+    branches: [main]
+    paths: ["detections/**", "tests/detections.yml", "tests/samples/**", "tools/ruletest.py"]
+
+permissions:
+  contents: read
+
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pyyaml
+      - name: Lint rules (ids, levels, parents, regexes, MITRE format)
+        run: python3 tools/ruletest.py lint detections/payloop_rules.xml
+      - name: Replay regression suite (attacks must fire, controls must stay quiet)
+        run: python3 tools/ruletest.py suite tests/detections.yml

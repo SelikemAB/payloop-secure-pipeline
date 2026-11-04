@@ -1,0 +1,227 @@
+<!--
+  PayLoop (fictional payments API) detection rules for Wazuh.
+  Input: the app's JSON-lines log (var/log/payloop.jsonl) collected with <log_format>json</log_format>.
+  Rule id block 110100-110199 is reserved for this application (custom range is 100000-120000).
+  Each rule carries the MITRE ATT&CK technique it evidences; see docs/ for the threat -> rule traceability.
+-->
+<group name="payloop,">
+
+  <!-- ===== Base event rules (low level, used as parents) ===== -->
+  <rule id="110100" level="0">
+    <decoded_as>json</decoded_as>
+    <field name="app" type="pcre2">^payloop$</field>
+    <description>PayLoop application event.</description>
+  </rule>
+
+  <rule id="110101" level="5">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^login_failed$</field>
+    <description>PayLoop: failed login for $(username) from $(srcip).</description>
+    <mitre><id>T1110</id></mitre>
+    <group>authentication_failed,</group>
+  </rule>
+
+  <rule id="110102" level="3">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^login_success$</field>
+    <description>PayLoop: successful login for $(username) from $(srcip).</description>
+    <group>authentication_success,</group>
+  </rule>
+
+  <rule id="110103" level="7">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^login_rate_limited$</field>
+    <description>PayLoop: login throttled for $(username) from $(srcip).</description>
+    <mitre><id>T1110</id></mitre>
+    <group>authentication_failures,</group>
+  </rule>
+
+  <rule id="110104" level="2">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^wallet_view$</field>
+    <description>PayLoop: wallet $(wallet_id) viewed by $(user).</description>
+  </rule>
+
+  <rule id="110105" level="4">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^authz_denied$</field>
+    <description>PayLoop: authorisation denied for $(user) on $(resource).</description>
+  </rule>
+
+  <rule id="110106" level="2">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^transfer$</field>
+    <description>PayLoop: transfer of $(amount) from wallet $(from_wallet) by $(user).</description>
+  </rule>
+
+  <rule id="110107" level="0">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^request$</field>
+    <description>PayLoop: HTTP request log line.</description>
+  </rule>
+
+  <!-- ===== Authentication ===== -->
+  <rule id="110111" level="10" frequency="8" timeframe="60">
+    <if_matched_sid>110101</if_matched_sid>
+    <same_field>srcip</same_field>
+    <description>PayLoop: possible brute force or password spraying, 8+ failed logins in 60s from $(srcip).</description>
+    <mitre><id>T1110</id></mitre>
+    <group>authentication_failures,</group>
+  </rule>
+
+  <rule id="110112" level="12" frequency="5" timeframe="120">
+    <if_sid>110102</if_sid>
+    <if_matched_sid>110101</if_matched_sid>
+    <same_field>srcip</same_field>
+    <description>PayLoop: successful login after repeated failures from $(srcip), possible credential compromise.</description>
+    <mitre><id>T1110</id></mitre>
+  </rule>
+
+  <rule id="110113" level="10" frequency="3" timeframe="120">
+    <if_matched_sid>110103</if_matched_sid>
+    <same_field>srcip</same_field>
+    <description>PayLoop: sustained login attempts despite throttling from $(srcip).</description>
+    <mitre><id>T1110</id></mitre>
+  </rule>
+
+  <rule id="110160" level="8">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^auth_token_invalid$</field>
+    <description>PayLoop: invalid session token presented ($(reason)) from $(srcip).</description>
+    <mitre><id>T1606</id></mitre>
+  </rule>
+
+  <rule id="110161" level="11" frequency="5" timeframe="60">
+    <if_matched_sid>110160</if_matched_sid>
+    <same_field>srcip</same_field>
+    <description>PayLoop: repeated forged or invalid tokens from $(srcip).</description>
+    <mitre><id>T1606</id></mitre>
+  </rule>
+
+  <rule id="110170" level="6">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^admin_access$</field>
+    <description>PayLoop: admin function $(resource) accessed by $(user) from $(srcip).</description>
+    <mitre><id>T1078</id></mitre>
+  </rule>
+
+  <!-- ===== Injection and file access (evaluated on the request log line) ===== -->
+  <rule id="110120" level="10">
+    <if_sid>110107</if_sid>
+    <field name="query" type="pcre2">(?i)(\bunion\b[\s+]+(all[\s+]+)?select\b|'\s*(or|and)\s+['\d]|;\s*(drop|insert|update|delete)\b|\bsleep\s*\(|\bbenchmark\s*\()</field>
+    <description>PayLoop: SQL injection pattern in request to $(path) from $(srcip).</description>
+    <mitre><id>T1190</id></mitre>
+    <group>web,attack,sql_injection,</group>
+  </rule>
+
+  <rule id="110123" level="4">
+    <if_sid>110107</if_sid>
+    <field name="status" type="pcre2">^5\d\d$</field>
+    <description>PayLoop: HTTP $(status) returned for $(path) to $(srcip).</description>
+  </rule>
+
+  <rule id="110124" level="9" frequency="5" timeframe="60">
+    <if_matched_sid>110123</if_matched_sid>
+    <same_field>srcip</same_field>
+    <description>PayLoop: repeated server errors triggered by $(srcip), possible fuzzing or exploitation.</description>
+    <mitre><id>T1190</id></mitre>
+  </rule>
+
+  <rule id="110121" level="10">
+    <if_sid>110107</if_sid>
+    <field name="query" type="pcre2">(?i)(\.\./|\.\.\\|%2e%2e)</field>
+    <description>PayLoop: path traversal pattern in request to $(path) from $(srcip).</description>
+    <mitre><id>T1190</id></mitre>
+    <group>web,attack,</group>
+  </rule>
+
+  <rule id="110122" level="8">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^path_blocked$</field>
+    <description>PayLoop: file access blocked by validation ($(file)) from $(srcip).</description>
+    <mitre><id>T1190</id></mitre>
+  </rule>
+
+  <!-- ===== SSRF ===== -->
+  <rule id="110130" level="10">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^ssrf_blocked$</field>
+    <description>PayLoop: outbound request to $(target_host) blocked ($(reason)) for $(user).</description>
+    <mitre><id>T1190</id></mitre>
+    <group>web,attack,ssrf,</group>
+  </rule>
+
+  <rule id="110131" level="12">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^webhook_fetch$</field>
+    <field name="target_host" type="pcre2">^(localhost|0\.0\.0\.0|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|\[?::1\]?$)</field>
+    <description>PayLoop: server fetched an internal address ($(target_host)) on behalf of $(user), SSRF succeeded.</description>
+    <mitre><id>T1190</id></mitre>
+    <group>web,attack,ssrf,</group>
+  </rule>
+
+  <rule id="110132" level="14">
+    <if_sid>110131</if_sid>
+    <field name="target_host" type="pcre2">^169\.254\.169\.254$</field>
+    <description>PayLoop: server fetched the cloud instance metadata endpoint on behalf of $(user).</description>
+    <mitre><id>T1552.005</id></mitre>
+    <group>web,attack,ssrf,</group>
+  </rule>
+
+  <!-- ===== Access control ===== -->
+  <rule id="110140" level="8" frequency="5" timeframe="60">
+    <if_matched_sid>110104</if_matched_sid>
+    <same_field>user</same_field>
+    <different_field>wallet_id</different_field>
+    <description>PayLoop: $(user) viewed 5+ different wallets in 60s, possible object-ID enumeration (IDOR).</description>
+    <mitre><id>T1213</id></mitre>
+  </rule>
+
+  <rule id="110141" level="9" frequency="3" timeframe="60">
+    <if_matched_sid>110105</if_matched_sid>
+    <same_field>user</same_field>
+    <description>PayLoop: repeated authorisation failures by $(user), possible access-control probing.</description>
+    <mitre><id>T1213</id></mitre>
+  </rule>
+
+  <!-- ===== Transfers ===== -->
+  <rule id="110150" level="12">
+    <if_sid>110106</if_sid>
+    <field name="amount" type="pcre2">^(-|0+$)</field>
+    <description>PayLoop: transfer ACCEPTED with zero or negative amount ($(amount)) by $(user), balance manipulation.</description>
+    <mitre><id>T1657</id></mitre>
+    <group>fraud,</group>
+  </rule>
+
+  <rule id="110153" level="10">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^transfer_rejected$</field>
+    <field name="amount" type="pcre2">^(-|0+$)</field>
+    <description>PayLoop: transfer REJECTED with zero or negative amount ($(amount)) by $(user), manipulation attempt.</description>
+    <mitre><id>T1657</id></mitre>
+    <group>fraud,</group>
+  </rule>
+
+  <rule id="110151" level="8" frequency="2" timeframe="60">
+    <if_matched_sid>110106</if_matched_sid>
+    <same_field>idem_key</same_field>
+    <description>PayLoop: two transfers accepted with the same idempotency key ($(idem_key)), duplicate payment.</description>
+    <mitre><id>T1657</id></mitre>
+    <group>fraud,</group>
+  </rule>
+
+  <rule id="110152" level="5">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^transfer_duplicate$</field>
+    <description>PayLoop: duplicate transfer submission absorbed by idempotency key $(idem_key).</description>
+    <group>fraud,</group>
+  </rule>
+
+  <!-- ===== Application health ===== -->
+  <rule id="110180" level="7">
+    <if_sid>110100</if_sid>
+    <field name="event" type="pcre2">^app_error$</field>
+    <description>PayLoop: unhandled application error $(type) at $(where).</description>
+  </rule>
+
+</group>

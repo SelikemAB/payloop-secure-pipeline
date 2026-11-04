@@ -1,0 +1,7 @@
+{"ts": "2026-10-30T10:00:00Z", "app": "payloop", "event": "login_failed", "srcip": "198.51.100.7", "rid": "r00000", "username": "carol"}
+{"ts": "2026-10-30T10:00:05Z", "app": "payloop", "event": "login_failed", "srcip": "198.51.100.7", "rid": "r00005", "username": "carol"}
+{"ts": "2026-10-30T10:00:10Z", "app": "payloop", "event": "login_failed", "srcip": "198.51.100.7", "rid": "r00010", "username": "carol"}
+{"ts": "2026-10-30T10:00:15Z", "app": "payloop", "event": "login_failed", "srcip": "198.51.100.7", "rid": "r00015", "username": "carol"}
+{"ts": "2026-10-30T10:00:20Z", "app": "payloop", "event": "login_failed", "srcip": "198.51.100.7", "rid": "r00020", "username": "carol"}
+{"ts": "2026-10-30T10:00:25Z", "app": "payloop", "event": "login_failed", "srcip": "198.51.100.7", "rid": "r00025", "username": "carol"}
+{"ts": "2026-10-30T10:00:40Z", "app": "payloop", "event": "login_success", "srcip": "198.51.100.7", "rid": "r00040", "user": "carol", "username": "carol"}

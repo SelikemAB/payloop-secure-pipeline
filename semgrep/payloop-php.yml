@@ -1,0 +1,99 @@
+rules:
+  - id: payloop.php.taint-to-sql
+    mode: taint
+    languages: [php]
+    severity: ERROR
+    message: >-
+      Request data reaches a raw SQL execution call without parameter binding (CWE-89).
+      Use PDO::prepare() with bound parameters.
+    metadata: {finding: F1, cwe: "CWE-89", owasp: "A03:2021 Injection"}
+    pattern-sources:
+      - pattern: $R->query[...]
+      - pattern: $R->json()
+    pattern-sinks:
+      - pattern: $DB->query(...)
+      - pattern: $DB->exec(...)
+
+  - id: payloop.php.taint-to-file-path
+    mode: taint
+    languages: [php]
+    severity: ERROR
+    message: >-
+      Request data is used to build a filesystem path (CWE-22). Validate against an allow-list
+      and confirm realpath() stays inside the base directory.
+    metadata: {finding: F3, cwe: "CWE-22", owasp: "A01:2021 Broken Access Control"}
+    pattern-sources:
+      - pattern: $R->query[...]
+    pattern-sinks:
+      - pattern: is_file(...)
+      - pattern: file_get_contents(...)
+      - pattern: readfile(...)
+      - pattern: include(...)
+      - pattern: require(...)
+    pattern-sanitizers:
+      - pattern: preg_match(...)
+      - pattern: realpath(...)
+
+  - id: payloop.php.taint-to-outbound-request
+    mode: taint
+    languages: [php]
+    severity: ERROR
+    message: >-
+      Request data is used as an outbound URL (CWE-918, SSRF). Enforce a host allow-list, resolve and
+      reject non-public addresses, disable redirects, and do not reflect the response.
+    metadata: {finding: F4, cwe: "CWE-918", owasp: "A10:2021 Server-Side Request Forgery"}
+    pattern-sources:
+      - pattern: $R->json()
+    pattern-sinks:
+      - pattern: file_get_contents($URL, ...)
+      - pattern: curl_init($URL)
+      - pattern: fopen($URL, ...)
+    pattern-sanitizers:
+      - pattern: SsrfGuard::validate(...)
+
+  - id: payloop.php.weak-password-hash
+    languages: [php]
+    severity: ERROR
+    message: >-
+      MD5/SHA-1 are fast, unsalted hashes and must not be used for passwords (CWE-328).
+      Use password_hash() with Argon2id or bcrypt.
+    metadata: {finding: F5, cwe: "CWE-328", owasp: "A02:2021 Cryptographic Failures"}
+    pattern-either:
+      - pattern: md5(...)
+      - pattern: sha1(...)
+
+  - id: payloop.php.hardcoded-secret
+    languages: [php]
+    severity: ERROR
+    message: >-
+      A secret appears to be hard-coded in source (CWE-798). Load it from the environment or a
+      secret manager and fail closed when it is missing.
+    metadata: {finding: F6, cwe: "CWE-798", owasp: "A02:2021 Cryptographic Failures"}
+    patterns:
+      - pattern: const $NAME = "...";
+      - metavariable-regex:
+          metavariable: $NAME
+          regex: (?i).*(secret|passw|api_?key|token_key|private).*
+
+  - id: payloop.php.non-constant-time-mac-compare
+    languages: [php]
+    severity: WARNING
+    message: >-
+      HMAC compared with === / !== leaks timing information (CWE-208). Use hash_equals().
+    metadata: {finding: F6, cwe: "CWE-208", owasp: "A02:2021 Cryptographic Failures"}
+    pattern-either:
+      - pattern: hash_hmac(...) !== $X
+      - pattern: hash_hmac(...) === $X
+
+  - id: payloop.php.exception-detail-to-client
+    languages: [php]
+    severity: WARNING
+    message: >-
+      Stack trace or file path is placed in a client response (CWE-209). Log details server-side and
+      return a generic error with a correlation id.
+    metadata: {finding: F9, cwe: "CWE-209", owasp: "A05:2021 Security Misconfiguration"}
+    patterns:
+      - pattern-inside: Response::json(...)
+      - pattern-either:
+          - pattern: $E->getTraceAsString()
+          - pattern: $E->getFile()
