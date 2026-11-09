@@ -53,6 +53,8 @@ jobs:
         with: {persist-credentials: false}
       - name: Build image
         run: docker build -t payloop:ci .
+      - name: Prepare reports directory
+        run: mkdir -p reports
       - name: Trivy filesystem (vulnerabilities, secrets, misconfiguration)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
