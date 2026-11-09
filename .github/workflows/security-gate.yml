@@ -54,7 +54,7 @@ jobs:
       - name: Build image
         run: docker build -t payloop:ci .
       - name: Trivy filesystem (vulnerabilities, secrets, misconfiguration)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           scan-type: fs
           scan-ref: .
@@ -64,7 +64,7 @@ jobs:
           output: reports/trivy-fs.json
           exit-code: "0"
       - name: Trivy image
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: payloop:ci
           format: json
