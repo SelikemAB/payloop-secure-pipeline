@@ -19,10 +19,67 @@ severity_overrides:
 
 # Waivers: temporary, owned, justified. An expired waiver fails the build.
 max_exception_days: 90
-exceptions: []
-# - id: CVE-2026-12345
-#   tool: trivy                  # optional: restrict to one scanner family
-#   paths: ["composer.lock"]     # optional: restrict to matching files
-#   reason: "Vulnerable function not reachable; upstream fix due next release"
-#   owner: security-team
-#   expires: 2026-12-15
+#
+# These waivers cover base-image OS package CVEs (alpine 3.20) surfaced by trivy-image.
+# Remediation-by-rebuild was attempted and rejected on evidence: a rebuild on the patched
+# alpine 3.21 base was verified in CI (PR #7) to carry every one of these CVEs plus new
+# ones (47 blocking vs 11), so no fixed base image is available. Risk is therefore accepted
+# on a time-boxed basis, with an owner, a per-CVE reason and a review date, until an upstream
+# fix lands. Each entry is scoped to the trivy image scanner. Format schema:
+# - id: CVE-XXXX   tool: trivy   paths: [...]   reason: "..."   owner: ...   expires: YYYY-MM-DD
+exceptions:
+  - id: CVE-2026-31789        # critical, openssl: heap overflow on 32-bit X.509 processing
+    tool: trivy
+    reason: "Vulnerable path triggers only on 32-bit builds; PayLoop images are built and deployed for linux/amd64 (64-bit), so it is not reachable in this deployment. No fixed alpine 3.20 package; 3.21 does not fix it either (verified in CI)."
+    owner: selikem-asare-brown
+    expires: 2026-12-10
+  - id: CVE-2025-15467        # openssl: RCE/DoS via oversized IV in CMAC
+    tool: trivy
+    reason: "Base-OS openssl CVE with no fixed package in alpine 3.20 or 3.21 (verified in CI). Time-boxed acceptance pending upstream fix."
+    owner: selikem-asare-brown
+    expires: 2026-12-10
+  - id: CVE-2025-69421        # openssl: DoS via malformed PKCS#12
+    tool: trivy
+    reason: "PayLoop does not parse untrusted PKCS#12 material; no fixed alpine package available. Time-boxed acceptance pending upstream fix."
+    owner: selikem-asare-brown
+    expires: 2026-12-10
+  - id: CVE-2025-6965         # sqlite: integer truncation
+    tool: trivy
+    reason: "SQLite access is via parameterized PDO statements over a local, synthetic datastore; no fixed alpine package available. Time-boxed acceptance pending upstream fix."
+    owner: selikem-asare-brown
+    expires: 2026-12-10
+  - id: CVE-2026-107891       # musl: ACE via integer overflow in regcomp
+    tool: trivy
+    reason: "Base libc CVE with no fixed alpine package available (verified in CI). Time-boxed acceptance pending upstream fix."
+    owner: selikem-asare-brown
+    expires: 2026-12-10
+  - id: CVE-2026-22184        # zlib: ACE via buffer overflow in untgz utility
+    tool: trivy
+    reason: "Affected code path is the untgz utility, which PayLoop does not invoke; no fixed alpine package available. Time-boxed acceptance pending upstream fix."
+    owner: selikem-asare-brown
+    expires: 2026-12-10
+  - id: CVE-2026-28387        # openssl: ACE use-after-free in DANE TLSA authentication
+    tool: trivy
+    reason: "PayLoop does not use DANE/TLSA authentication; no fixed alpine package available. Time-boxed acceptance pending upstream fix."
+    owner: selikem-asare-brown
+    expires: 2026-12-10
+  - id: CVE-2026-28388        # openssl: DoS via NULL deref in delta CRL processing
+    tool: trivy
+    reason: "PayLoop does not process delta CRLs; no fixed alpine package available. Time-boxed acceptance pending upstream fix."
+    owner: selikem-asare-brown
+    expires: 2026-12-10
+  - id: CVE-2026-28389        # openssl: DoS in CMS processing
+    tool: trivy
+    reason: "PayLoop does not process untrusted CMS material; no fixed alpine package available. Time-boxed acceptance pending upstream fix."
+    owner: selikem-asare-brown
+    expires: 2026-12-10
+  - id: CVE-2026-28390        # openssl: DoS via NULL deref in CMS EnvelopedData
+    tool: trivy
+    reason: "PayLoop does not process untrusted CMS EnvelopedData; no fixed alpine package available. Time-boxed acceptance pending upstream fix."
+    owner: selikem-asare-brown
+    expires: 2026-12-10
+  - id: CVE-2026-40200        # musl: ACE/DoS via stack corruption in qsort
+    tool: trivy
+    reason: "Base libc CVE with no fixed alpine package available (verified in CI). Time-boxed acceptance pending upstream fix."
+    owner: selikem-asare-brown
+    expires: 2026-12-10
