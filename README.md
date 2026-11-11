@@ -52,7 +52,7 @@ make gate-demo-bad                        # same on the vulnerable sample       
 - **One decision point.** Scanners are interchangeable evidence producers; severity and blocking live in one YAML file.
 
 ## Honest limits
-The workflows now run on GitHub and are green; `actionlint` and `yamllint` are clean on all five workflow files (re-verified 2026-11-11).
+The workflows now run on GitHub and are green; `actionlint` and `yamllint` are clean on all nine workflow files across the portfolio (re-verified 2026-11-11).
 The image is built and scanned by trivy in the `container-and-iac` job, and the `gate` passes with the base-image CVEs waived
 (time-boxed and owner-signed in `policy/gate-policy.yml`; the rebuild-on-patched-base path was tried and shown not to help, see PR #7).
 Still open: Actions are referenced by tag rather than pinned by commit SHA, and the image is not signed. See `docs/pipeline-design.md`
